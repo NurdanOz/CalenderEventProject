@@ -1,0 +1,88 @@
+﻿@model IEnumerable<CalenderEventProject.Entities.Event>
+
+@{
+  
+    Layout = "~/Views/Shared/_CalLayout.cshtml"; 
+    ViewData["BreadcrumbActive"] = "Etkinlikler"; 
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tüm Etkinlikler</h3>
+                        <div class="card-tools">
+                            <a href="/Event/AddEvent" class="btn btn-primary btn-sm">Yeni Etkinlik Ekle</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (Model != null && Model.Any())
+                        {
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">ID</th>
+                                        <th>Başlık</th>
+                                        <th>Kategori</th>
+                                        <th>Başlangıç Tarihi</th>
+                                        <th>Bitiş Tarihi</th>
+                                        <th>Tüm Gün mü?</th>
+                                        <th style="width: 150px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var eventItem in Model)
+                                    {
+                                        <tr>
+                                            <td>@eventItem.EventId</td>
+                                            <td>@eventItem.Title</td>
+                                            <td>
+                                                @if (eventItem.Category != null)
+                                                {
+
+                                                    <span style="display: inline-block; width: 20px; height: 20px; background-color: @eventItem.Category.Color; border: 1px solid #ccc; vertical-align: middle; margin-right: 5px;"></span>
+                                                    @eventItem.Category.CategoryName
+                                                }
+                                                else
+                                                {
+                                                    <span>Kategori Yok</span>
+                                                }
+                                            </td>
+                                            <td>@eventItem.StartDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@eventItem.EndDate.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                @if (eventItem.AllDay)
+                                                {
+                                                    <span class="badge badge-success">Evet</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-secondary">Hayır</span>
+                                                }
+                                            </td>
+                                            <td>
+
+                                                <a href="/Event/Edit/@eventItem.EventId" class="btn btn-info btn-sm">Düzenle</a>
+                                                <a href="/Event/Delete/@eventItem.EventId" class="btn btn-danger btn-sm">Sil</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Henüz hiç etkinlik bulunmamaktadır.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    
+}

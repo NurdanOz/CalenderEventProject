@@ -1,0 +1,46 @@
+﻿@model CalenderEventProject.Entities.Category
+
+@{
+   
+    Layout = "~/Views/Shared/_Callayout.cshtml"; 
+    ViewData["BreadcrumbActive"] = "Yeni Kategori Ekle";
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Yeni Kategori Bilgileri</h3>
+                    </div>
+                    @using (Html.BeginForm("AddCategory", "Category", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken() 
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" }) 
+
+                        <div class="card-body">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CategoryName, "Kategori Adı")
+                                @Html.EditorFor(model => model.CategoryName, new { htmlAttributes = new { @class = "form-control", placeholder = "Kategori Adını Giriniz" } })
+                                @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Color, "Renk Kodu (Opsiyonel)")
+                                @Html.EditorFor(model => model.Color, new { htmlAttributes = new { @class = "form-control", placeholder = "Renk Kodunu Giriniz (örn: #FF0000 veya red)" } })
+                                @Html.ValidationMessageFor(model => model.Color, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Kaydet</button>
+                            @Html.ActionLink("İptal / Listeye Dön", "Index", "Category", null, new { @class = "btn btn-secondary" })
+                        </div>
+                    } 
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval") 
+}

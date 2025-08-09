@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "Takvim";
+    Layout = "~/Views/Shared/_CalLayout.cshtml";
+}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="sticky-top mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Sürüklenen Etkinlikler</h4>
+                        </div>
+                        <div class="card-body">
+                           <div id="external-events">
+                                
+                                <div class="checkbox">
+                                    <label for="drop-remove">
+                                        <input type="checkbox" id="drop-remove">
+                                        Ekledikten sonra sil
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Yeni Etkinlik Oluştur</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="new-event-category" class="form-control">
+                                    <option value="">Lütfen kategori seçin</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <input id="new-event" type="text" class="form-control" placeholder="Etkinlik Başlığı">
+                                <div class="input-group-append">
+                                    <button id="add-new-event" type="button" class="btn btn-primary">Ekle</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card card-primary">
+                    <div class="card-body p-0">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    @section scripts {
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/tr.js"></script>
+        <script>
+$(function () {
+    // Kategori listesini AJAX ile sunucudan yükleyen fonksiyon
+    function loadCategories() {
+        $.getJSON('@Url.Action("GetCategories", "Calendar")', function (categories) {
+            var $categorySelect = $('#new-event-category');
+            $categorySelect.empty(); // Dropdown'u temizle
+
+            // Varsayılan seçenek "Lütfen kategori seçin"
+            $categorySelect.append($('<option>', {
+                value: '',
+                text: 'Lütfen kategori seçin'
+            }));
+
+            // Sunucudan gelen her kategori için bir <option> elementi oluştur
+            $.each(categories, function (i, category) {
+                $categorySelect.append($('<option>', {
+                    value: category.id,
+                    text: category.text,
+                    'data-color': category.color // Kategori rengini data-color attribute'üne ekle
+                }));
+            });
+        });
+    }
+
+    // Sürükle-bırak için etkinlikleri yükler
+    function loadDraggableEvents() {
+        $.getJSON('@Url.Action("GetLastEvents", "Calendar")', function (data) {
+            var $externalEvents = $('#external-events');
+            $externalEvents.find('.draggable-event').remove(); // Yalnızca dinamik eklenenleri temizle
+
+            data.forEach(function (event) {
+                var eventDiv = $('<div>')
+                    .addClass('external-event draggable-event')
+                    .text(event.title)
+                    .attr('data-event-id', event.id)
+                    .css({
+                        'background-color': event.color,
+                        'border-color': event.color,
+                        'color': '#fff'
+                    });
+                $externalEvents.append(eventDiv);
+            });
+            ini_events($externalEvents.find('.draggable-event'));
+        });
+    }
+
+    // Draggable eventleri başlat
+    function ini_events(ele) {
+        ele.each(function () {
+            var eventObject = {
+                id: $(this).data('event-id'),
+                title: $.trim($(this).text()),
+                color: $(this).css('background-color')
+            };
+            $(this).data('eventObject', eventObject);
+            $(this).draggable({
+                zIndex: 1070,
+                revert: true,
+                revertDuration: 0
+            });
+        });
+    }
+
+    // FullCalendar'ı başlat
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        themeSystem: 'bootstrap',
+        editable: true,
+        droppable: true,
+        locale: 'tr',
+        events: '@Url.Action("GetEvents", "Calendar")',
+
+        // Sürükle-bırak ile takvime bırakıldığında (Bu kısım zaten doğruydu)
+        drop: function (info) {
+            var eventObject = $(info.draggedEl).data('eventObject');
+            if (eventObject) {
+                $.post('@Url.Action("UpdateEventDate", "Calendar")', {
+                    id: eventObject.id,
+                    start: info.dateStr,
+                    end: info.dateStr
+                }, function (res) {
+                    if (res.success) {
+                        calendar.refetchEvents();
+                    } else {
+                        alert('Etkinlik güncellenemedi: ' + res.message);
+                    }
+                });
+            }
+        },
+
+        // Takvim içindeki bir etkinlik sürüklenip bırakıldığında (Bu kısım zaten doğruydu)
+        eventDrop: function (info) {
+            $.post('@Url.Action("UpdateEventDate", "Calendar")', {
+                id: info.event.id,
+                start: info.event.start.toISOString(),
+                end: info.event.end ? info.event.end.toISOString() : info.event.start.toISOString()
+            }, function (res) {
+                if (!res.success) {
+                    alert('Etkinlik güncelleme başarısız oldu!');
+                    info.revert();
+                }
+            });
+        },
+
+        // Takvimdeki etkinlik üzerine tıklandığında silme işlemi (Bu kısım zaten doğruydu)
+        eventClick: function(info) {
+            if (confirm("Bu etkinliği silmek istediğinize emin misiniz?")) {
+                $.post('@Url.Action("DeleteEvent", "Calendar")', { id: info.event.id }, function(res) {
+                    if (res.success) {
+                        info.event.remove();
+                    } else {
+                        alert('Silme işlemi başarısız: ' + (res.message || 'Bilinmeyen hata'));
+                    }
+                });
+            }
+        },
+
+        // Custom event render (Bu kısım zaten doğruydu)
+        eventContent: function(arg) {
+            var color = arg.event.backgroundColor || '#3788d8';
+            var title = arg.event.title;
+            var html = '<div style="display:flex;align-items:center;justify-content:space-between;min-height:22px;">' +
+                       '<span style="display:inline-block;width:6px;height:22px;border-radius:3px;background:' + color + ';margin-right:6px;flex-shrink:0;"></span>' +
+                       '<span style="word-break:break-word;white-space:normal;flex:1;min-width:0;">' + title + '</span>' +
+                       '<button class="btn btn-link btn-sm p-0 ml-2 delete-event-btn" data-event-id="' + arg.event.id + '" title="Sil" style="color:#dc3545;"><i class="fas fa-trash"></i></button>' +
+                       '</div>';
+            return { html: html };
+        }
+    });
+    calendar.render();
+
+    // Silme butonu için event delegation (Bu kısım zaten doğruydu)
+    $(document).on('click', '.delete-event-btn', function(e) {
+        e.stopPropagation();
+        var eventId = $(this).data('event-id');
+        if (confirm('Bu etkinliği silmek istediğinize emin misiniz?')) {
+            $.post('@Url.Action("DeleteEvent", "Calendar")', { id: eventId }, function(res) {
+                if (res.success) {
+                    calendar.refetchEvents();
+                } else {
+                    alert('Silme başarısız: ' + (res.message || 'Bilinmeyen hata'));
+                }
+            });
+        }
+    });
+
+    // Yeni Etkinlik Ekleme (Burayı güncelledik)
+    $('#add-new-event').click(function () {
+        var title = $('#new-event').val();
+        var categoryId = $('#new-event-category').val();
+        var categoryColor = $('#new-event-category option:selected').data('color');
+
+        if (title.length === 0) {
+            alert('Lütfen bir etkinlik başlığı girin.');
+            return;
+        }
+
+        if (!categoryId) {
+            alert('Lütfen bir kategori seçin.');
+            return;
+        }
+
+        var now = new Date();
+        var startDateTime = now.toISOString();
+        var endDateTime = new Date(now.getTime() + 60*60*1000).toISOString();
+
+        $.post('@Url.Action("AddEvent", "Calendar")', {
+            title: title,
+            start: startDateTime,
+            end: endDateTime,
+            categoryId: categoryId
+        }, function (res) {
+            if (res.success) {
+                // Yeni eklenen etkinliği FullCalendar'a ekle
+                calendar.addEvent({
+                    id: res.eventId,
+                    title: title,
+                    start: startDateTime,
+                    end: endDateTime,
+                    allDay: false,
+                    backgroundColor: categoryColor,
+                    borderColor: categoryColor
+                });
+                loadDraggableEvents(); // Sol paneldeki etkinlikleri de güncelle
+                $('#new-event').val('');
+                $('#new-event-category').val('');
+            } else {
+                alert('Etkinlik ekleme başarısız oldu!');
+            }
+        });
+    });
+
+    // Renk seçme fonksiyonu kaldırıldı, kategori rengi kullanılacak.
+
+    // Sayfa yüklendiğinde sol paneldeki etkinlikleri ve kategorileri çek
+    loadDraggableEvents();
+    loadCategories();
+});
+        </script>
+    }

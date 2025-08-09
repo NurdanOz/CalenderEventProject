@@ -1,0 +1,70 @@
+﻿@model IEnumerable<CalenderEventProject.Entities.Category>
+
+@{
+    
+    Layout = "~/Views/Shared/_CalLayout.cshtml";
+    ViewData["BreadcrumbActive"] = "Kategoriler";
+}
+
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tüm Kategoriler</h3>
+                        <div class="card-tools">
+                          
+                            <a href="/Category/AddCategory" class="btn btn-primary btn-sm">Yeni Kategori Ekle</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (Model != null && Model.Any())
+                        {
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">ID</th>
+                                        <th>Kategori Adı</th>
+                                        <th>Renk Kodu</th>
+                                        <th style="width: 150px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in Model)
+                                    {
+                                        <tr>
+                                            <td>@category.CategoryId</td>
+                                            <td>@category.CategoryName</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(category.Color))
+                                                {
+                                                    <span style="display: inline-block; width: 20px; height: 20px; background-color: @category.Color; border: 1px solid #ccc; vertical-align: middle; margin-right: 5px;"></span>
+                                                    <span>@category.Color</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Yok</span>
+                                                }
+                                            </td>
+                                            <td>
+                                              
+                                                <a href="/Category/Edit/@category.CategoryId" class="btn btn-info btn-sm">Düzenle</a>
+                                                <a href="/Category/Delete/@category.CategoryId" class="btn btn-danger btn-sm">Sil</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Henüz hiç kategori bulunmamaktadır.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
