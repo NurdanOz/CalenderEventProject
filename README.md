@@ -1,4 +1,4 @@
-<img width="1894" height="867" alt="Cal2" src="https://github.com/user-attachments/assets/e583ba95-642d-4cdb-92a2-e4375a20a819" />📅 EventCalendar - Etkinlik Takvimi Uygulaması
+📅 EventCalendar - Etkinlik Takvimi Uygulaması
 EventCalendar, kullanıcıların etkinlik ve kategori yönetimini kolayca yapabildiği, modern ve etkileşimli bir web uygulamasıdır. 
 Bu proje, takvimdeki etkinlikleri sürükle-bırak yöntemiyle yönetme ve kategorilere göre renklendirme gibi gelişmiş özellikler sunar.
 
@@ -39,8 +39,3 @@ Frontend ve backend arasında tam bir senkronizasyon sağlanarak sorunsuz bir ku
 
 <img width="1901" height="858" alt="Cal4" src="https://github.com/user-attachments/assets/5f60ed97-c768-4172-baac-68b4ca747f20" />
 
-<img width="1890" height="860" alt="Cal5" src="https://github.com/user-attachments/assets/00e30661-abd0-4f10-9497-8785e3250bd9" />
-
-<img width="1916" height="858" alt="Cal6" src="https://github.com/user-attachments/assets/353e2ed1-d1ec-452c-ad54-a9662d99a459" />
-
-<img width="1908" height="863" alt="Cal7" src="https://github.com/user-attachments/assets/b9f85374-4720-4568-b855-759c381991a4" />
