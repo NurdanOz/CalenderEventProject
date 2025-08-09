@@ -1,4 +1,5 @@
 📅 EventCalendar - Etkinlik Takvimi Uygulaması
+
 EventCalendar, kullanıcıların etkinlik ve kategori yönetimini kolayca yapabildiği, modern ve etkileşimli bir web uygulamasıdır. 
 Bu proje, takvimdeki etkinlikleri sürükle-bırak yöntemiyle yönetme ve kategorilere göre renklendirme gibi gelişmiş özellikler sunar.
 
